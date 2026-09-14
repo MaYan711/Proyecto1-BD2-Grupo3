@@ -1,0 +1,2 @@
+CREATE PUBLICATION pub_nodo1
+FOR TABLE operaciones;
