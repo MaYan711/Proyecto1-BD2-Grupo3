@@ -1,10 +1,35 @@
 Nodo: Nodo 1
 Responsable: Mario
-Sistema operativo: Windows
+Sistema operativo: Windows 10
 PostgreSQL: 18.1
 Rol: Lectura y escritura
-Puerto: 5432
-IP Tailscale: 100.115.156.14
-Base de datos: databaugs
-Usuario tecnico: bd2_admin
-Usuario de replicacion: replicador
+
+Hostname:
+DESKTOP-06J573U
+
+IP Tailscale:
+100.115.156.14
+
+Puerto PostgreSQL:
+5432
+
+Base de datos:
+databaugs
+
+Usuario tecnico:
+bd2_admin
+
+Usuario de replicacion:
+replicador
+
+Nodo 2:
+100.100.231.68
+
+Nodo 3:
+100.89.187.125
+
+Publicacion:
+pub_nodo1
+
+Tabla publicada:
+public.operaciones
