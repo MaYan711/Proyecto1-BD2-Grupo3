@@ -110,3 +110,30 @@ sudo -u postgres psql -d databaugs -c "SELECT * FROM prueba_replicacion;"
 Resultado:
 
 1 | nodo2-kenny | Registro inicial creado desde Nodo 2 Kenny
+
+## Estandarizacion de tabla oficial
+
+Se estandarizo el Nodo 2 para utilizar la tabla oficial del proyecto:
+
+public.operaciones
+
+Estructura:
+
+- id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+- descripcion TEXT NOT NULL
+- origen VARCHAR(50) NOT NULL
+- valor NUMERIC(10,2) NOT NULL
+- fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+La tabla permite ejecutar operaciones de lectura y escritura desde el Nodo 2.
+
+## Pruebas sobre public.operaciones
+
+Prueba local:
+
+psql -h 127.0.0.1 -U app_databaugs -d databaugs -c "SELECT * FROM public.operaciones;"
+
+Prueba por Tailscale:
+
+psql -h 100.100.231.68 -U app_databaugs -d databaugs -c "SELECT * FROM public.operaciones;"
+
