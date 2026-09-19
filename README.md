@@ -13,6 +13,7 @@ asignado: **PostgreSQL** (grupo impar).
 | Nodo 3 | Miguel | Solo lectura y contingencia | `100.89.187.125` |
 | Proxy/balanceador | Miguel | HAProxy, en la misma maquina de Nodo 3 | `100.89.187.125:6432` |
 | Monitoreo | Miguel | Prometheus + Grafana, centralizado en Nodo 3 | `100.89.187.125:3000` |
+
 Replicacion: logica (`pg_publication`/`pg_subscription`), mesh bidireccional
 entre Nodo 1 y Nodo 2, con Nodo 3 suscrito a ambos como destino de solo
 lectura. Red privada: Tailscale entre las tres maquinas.
