@@ -1,0 +1,69 @@
+version: "3.8"
+
+# Se usa network_mode: host en los tres servicios para simplificar el
+# alcance de red: postgres_exporter necesita llegar a PostgreSQL en este
+# mismo equipo (Nodo 3) y a Nodo 1 / Nodo 2 via Tailscale;
+# con host networking no hay que mapear puertos ni resolver DNS entre
+# contenedores.
+
+services:
+  # Nodo 3 (local). Puerto default del exporter: 9187.
+  postgres_exporter_nodo3:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter_nodo3
+    network_mode: host
+    environment:
+      DATA_SOURCE_NAME: "postgresql://monitoreo:MonitoreoBD2_2026@127.0.0.1:5432/databaugs?sslmode=disable"
+    command:
+      - "--web.listen-address=:9187"
+    restart: unless-stopped
+
+  # Nodo 1 (Mario), via Tailscale.
+  postgres_exporter_nodo1:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter_nodo1
+    network_mode: host
+    environment:
+      DATA_SOURCE_NAME: "postgresql://monitor:MonitorBD2_2026@100.115.156.14:5432/databaugs?sslmode=disable"
+    command:
+      - "--web.listen-address=:9188"
+    restart: unless-stopped
+
+  # Nodo 2 (Kenny), via Tailscale. Rol `monitor`, no el superusuario.
+  postgres_exporter_nodo2:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter_nodo2
+    network_mode: host
+    environment:
+      DATA_SOURCE_NAME: "postgresql://monitor:MonitorBD2_2026@100.100.231.68:5432/databaugs?sslmode=disable"
+    command:
+      - "--web.listen-address=:9189"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    network_mode: host
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.listen-address=:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    network_mode: host
+    environment:
+      GF_SERVER_HTTP_PORT: 3000
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:

@@ -1,0 +1,28 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "postgres_exporter"
+    static_configs:
+      # Los tres exporters corren centralizados en la maquina de Miguel
+      # (Nodo 3), cada uno en un puerto distinto, apuntando via Tailscale
+      # a la base de datos de cada nodo. Por eso todos los targets usan
+      # 127.0.0.1 (Prometheus tambien corre en la misma maquina).
+      - targets: ["127.0.0.1:9187"]
+        labels:
+          nodo: "nodo3"
+          responsable: "miguel"
+      - targets: ["127.0.0.1:9188"]
+        labels:
+          nodo: "nodo1"
+          responsable: "mario"
+      - targets: ["127.0.0.1:9189"]
+        labels:
+          nodo: "nodo2"
+          responsable: "kenny"
+
+  - job_name: "haproxy"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["100.89.187.125:8404"]
