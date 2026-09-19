@@ -1,0 +1,11 @@
+Nodo: Nodo 3
+Responsable: Miguel
+Sistema operativo: Ubuntu 24.04
+PostgreSQL: 18.6
+Rol: Solo lectura y contingencia
+Puerto: 5432
+IP Tailscale: 100.89.187.125
+Hostname Tailscale: kida
+Base de datos: databaugs
+Usuario de aplicacion (solo lectura): app_databaugs
+Suscripciones: sub_nodo3_a_nodo1, sub_nodo3_a_nodo2
