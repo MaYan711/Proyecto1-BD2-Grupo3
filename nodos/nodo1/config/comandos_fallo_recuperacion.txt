@@ -1,0 +1,28 @@
+VERIFICAR SERVICIO
+
+Get-Service postgresql-x64-18
+
+
+DETENER NODO 1
+
+Stop-Service postgresql-x64-18
+
+
+VERIFICAR NODO 1 DETENIDO
+
+Get-Service postgresql-x64-18
+
+
+ENCENDER NODO 1
+
+Start-Service postgresql-x64-18
+
+
+VERIFICAR RECUPERACION
+
+Get-Service postgresql-x64-18
+
+
+VERIFICAR PUERTO
+
+netstat -ano | findstr :5432
