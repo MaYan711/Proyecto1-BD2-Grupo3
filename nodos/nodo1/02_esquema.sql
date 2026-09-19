@@ -1,0 +1,30 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE public.operaciones (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    descripcion TEXT NOT NULL,
+    origen VARCHAR(50) NOT NULL,
+    valor NUMERIC(10,2) NOT NULL,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+GRANT USAGE, CREATE ON SCHEMA public TO app_databaugs;
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+ON ALL TABLES IN SCHEMA public
+TO app_databaugs;
+
+GRANT USAGE, SELECT
+ON ALL SEQUENCES IN SCHEMA public
+TO app_databaugs;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+GRANT SELECT, INSERT, UPDATE, DELETE
+ON TABLES TO app_databaugs;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+GRANT USAGE, SELECT
+ON SEQUENCES TO app_databaugs;
+
+GRANT USAGE ON SCHEMA public TO replicador;
+GRANT SELECT ON TABLE public.operaciones TO replicador;

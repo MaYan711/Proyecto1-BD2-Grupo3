@@ -1,0 +1,47 @@
+Nodo: Nodo 1
+Responsable: Mario
+Sistema operativo: Windows 10 Pro
+PostgreSQL: 18.6
+Rol: Lectura y escritura
+
+Hostname:
+DESKTOP-06J573U
+
+IP Tailscale:
+100.115.156.14
+
+Puerto PostgreSQL:
+5432
+
+Base de datos:
+databaugs
+
+Usuario de aplicacion:
+app_databaugs
+
+Password aplicacion:
+AppBD2_2026
+
+Usuario de replicacion:
+replicador
+
+Password replicacion:
+ReplicacionBD2_2026
+
+Nodo 2:
+100.100.231.68
+
+Nodo 3:
+100.89.187.125
+
+Publicacion:
+pub_nodo1
+
+Suscripcion:
+sub_nodo1_desde_nodo2
+
+Tabla publicada:
+public.operaciones
+
+HAProxy:
+100.89.187.125:6432
