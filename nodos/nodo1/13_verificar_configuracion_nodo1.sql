@@ -14,18 +14,30 @@ SELECT
     rolcanlogin,
     rolreplication
 FROM pg_roles
-WHERE rolname IN ('bd2_admin', 'replicador');
+WHERE rolname IN ('app_databaugs', 'replicador');
 
 SELECT
     pubname,
-    puballtables
-FROM pg_publication;
+    pubinsert,
+    pubupdate,
+    pubdelete,
+    pubtruncate
+FROM pg_publication
+WHERE pubname = 'pub_nodo1';
 
 SELECT
     pubname,
     schemaname,
     tablename
-FROM pg_publication_tables;
+FROM pg_publication_tables
+WHERE pubname = 'pub_nodo1';
+
+SELECT
+    subname,
+    subenabled,
+    subpublications,
+    suborigin
+FROM pg_subscription;
 
 SELECT
     line_number,
@@ -41,4 +53,4 @@ WHERE address IN (
 );
 
 SELECT COUNT(*) AS total_operaciones
-FROM operaciones;
+FROM public.operaciones;

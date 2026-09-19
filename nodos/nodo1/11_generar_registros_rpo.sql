@@ -1,4 +1,4 @@
-INSERT INTO operaciones (
+INSERT INTO public.operaciones (
     descripcion,
     origen,
     valor
@@ -11,7 +11,7 @@ FROM generate_series(1, 20) AS numero;
 
 SELECT
     COUNT(*) AS registros_rpo_generados
-FROM operaciones
+FROM public.operaciones
 WHERE descripcion LIKE 'RPO_NODO1_%';
 
 SELECT
@@ -20,6 +20,6 @@ SELECT
     origen,
     valor,
     fecha_registro
-FROM operaciones
+FROM public.operaciones
 WHERE descripcion LIKE 'RPO_NODO1_%'
 ORDER BY fecha_registro;

@@ -1,9 +1,9 @@
 SELECT
     CURRENT_TIMESTAMP AS momento_inicio,
     COUNT(*) AS registros_antes
-FROM operaciones;
+FROM public.operaciones;
 
-INSERT INTO operaciones (
+INSERT INTO public.operaciones (
     descripcion,
     origen,
     valor
@@ -21,8 +21,8 @@ SELECT
     origen,
     valor,
     fecha_registro
-FROM operaciones
+FROM public.operaciones
 WHERE descripcion = 'MARCA_PRE_FALLA_NODO1';
 
 SELECT COUNT(*) AS registros_despues_marca
-FROM operaciones;
+FROM public.operaciones;

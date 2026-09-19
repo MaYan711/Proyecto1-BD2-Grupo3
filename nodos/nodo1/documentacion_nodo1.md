@@ -8,26 +8,26 @@ Mario
 
 El Nodo 1 funciona como uno de los nodos principales de lectura y escritura de la arquitectura distribuida.
 
-Debe permitir operaciones:
+Permite operaciones:
 
 - SELECT
 - INSERT
 - UPDATE
 - DELETE
 
-Durante condiciones normales trabajara junto con el Nodo 2.
+Durante condiciones normales trabaja junto con el Nodo 2.
 
-Cuando el Nodo 1 falle, el Nodo 2 debera continuar ofreciendo operaciones de lectura y escritura.
+Cuando el Nodo 1 falla, HAProxy redirige las nuevas conexiones hacia el Nodo 2.
 
-Cuando el Nodo 1 vuelva a estar disponible, debera reintegrarse a la arquitectura y sincronizar los cambios correspondientes.
+Cuando el Nodo 1 vuelve a estar disponible, se reintegra a la arquitectura y recibe los cambios generados durante su ausencia.
 
 ## Sistema operativo
 
-Windows
+Windows 10 Pro
 
 ## Motor de base de datos
 
-PostgreSQL 18.1
+PostgreSQL 18.6
 
 ## Hostname
 
@@ -38,15 +38,12 @@ DESKTOP-06J573U
 Tailscale
 
 IP Nodo 1:
-
 100.115.156.14
 
 IP Nodo 2:
-
 100.100.231.68
 
 IP Nodo 3:
-
 100.89.187.125
 
 ## Puerto PostgreSQL
@@ -63,9 +60,12 @@ Lectura y escritura
 
 ## Usuarios
 
-### bd2_admin
+### app_databaugs
 
 Usuario utilizado para operaciones normales sobre la base de datos.
+
+Password:
+AppBD2_2026
 
 Permisos principales:
 
@@ -78,12 +78,15 @@ Permisos principales:
 
 Usuario utilizado para conexiones relacionadas con replicacion logica.
 
+Password:
+ReplicacionBD2_2026
+
 Configuracion:
 
 - LOGIN
 - REPLICATION
 - USAGE sobre esquema public
-- SELECT sobre tabla operaciones
+- SELECT sobre tabla public.operaciones
 
 ## Configuracion PostgreSQL
 
@@ -93,9 +96,9 @@ port = 5432
 
 wal_level = logical
 
-max_wal_senders = 10
+max_wal_senders = 20
 
-max_replication_slots = 10
+max_replication_slots = 20
 
 hot_standby = on
 
@@ -121,16 +124,22 @@ La tabla principal utilizada para pruebas es:
 
 public.operaciones
 
+Estructura:
+
+- id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+- descripcion TEXT NOT NULL
+- origen VARCHAR(50) NOT NULL
+- valor NUMERIC(10,2) NOT NULL
+- fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
 Los identificadores utilizan UUID para disminuir conflictos entre escrituras generadas desde diferentes nodos.
 
 ## Publicacion logica
 
 Nombre:
-
 pub_nodo1
 
 Tabla publicada:
-
 public.operaciones
 
 Operaciones publicadas:
@@ -139,6 +148,42 @@ Operaciones publicadas:
 - UPDATE
 - DELETE
 - TRUNCATE
+
+REPLICA IDENTITY:
+DEFAULT
+
+## Suscripcion logica
+
+Nombre:
+sub_nodo1_desde_nodo2
+
+Publisher:
+Nodo 2 - 100.100.231.68
+
+Publicacion remota:
+pub_nodo2
+
+Parametros principales:
+
+- copy_data = false
+- create_slot = true
+- enabled = true
+- origin = none
+
+## Proxy y balanceador
+
+HAProxy se encuentra en el equipo de Miguel.
+
+Endpoint utilizado por clientes:
+
+100.89.187.125:6432
+
+Funcion:
+
+- Balancear conexiones entre Nodo 1 y Nodo 2.
+- Detectar fallas de los nodos principales.
+- Redirigir conexiones al nodo disponible.
+- Utilizar Nodo 3 como backup de contingencia para lectura.
 
 ## Pruebas realizadas
 
@@ -151,57 +196,57 @@ Se comprobaron correctamente:
 - UPDATE
 - DELETE
 
-utilizando el usuario bd2_admin.
+utilizando el usuario app_databaugs.
 
 ### Conectividad privada
 
-El Nodo 1 tiene conectividad Tailscale hacia:
+El Nodo 1 tiene conectividad PostgreSQL mediante Tailscale con:
 
 - Nodo 2: 100.100.231.68
 - Nodo 3: 100.89.187.125
 
-### Falla local
+### Replicacion
 
-Se detuvo manualmente el servicio PostgreSQL.
+Se validaron operaciones desde Nodo 1 hacia Nodo 2 y Nodo 3.
+
+Tambien se validaron operaciones originadas en Nodo 2 que llegaron a Nodo 1 y Nodo 3.
+
+### Falla y failover
+
+Se detuvo manualmente el servicio PostgreSQL del Nodo 1.
 
 Durante la falla:
 
 - PostgreSQL paso a estado Stopped.
-- El puerto 5432 dejo de escuchar.
-- Las conexiones fueron rechazadas.
+- El puerto 5432 dejo de responder.
+- HAProxy detecto la indisponibilidad.
+- Las conexiones fueron redirigidas hacia Nodo 2.
 
 Posteriormente se inicio nuevamente el servicio.
 
 Resultado:
 
 - PostgreSQL regreso a estado Running.
-- El puerto 5432 volvio a estar disponible.
-- databaugs pudo consultarse nuevamente.
+- Nodo 1 recupero los cambios generados durante su ausencia.
+- Se comprobo reintegracion del nodo.
 
-### Persistencia
+### Persistencia y RPO
 
-Antes de una falla controlada se inserto:
+Durante las pruebas controladas se verifico que los registros creados mientras Nodo 1 estaba fuera de servicio aparecieron despues de su recuperacion.
 
-MARCA_PRE_FALLA_NODO1
+No se observo perdida de los registros utilizados en las pruebas realizadas.
 
-Despues de recuperar PostgreSQL:
+El valor final de RPO debe registrarse junto con los resultados consolidados de todas las fases.
 
-- La marca continuo disponible.
-- Se conservaron los registros existentes.
-- No se observo perdida local de registros.
+## Estado actual
 
-Esta prueba no representa todavia el RPO final de la arquitectura.
-
-## Pendientes de integracion
-
-- Conexion PostgreSQL real desde Nodo 2.
-- Conexion PostgreSQL real desde Nodo 3.
-- Suscripcion del Nodo 2 a pub_nodo1.
-- Suscripcion del Nodo 1 a pub_nodo2.
-- Verificacion de replicacion Nodo 1 hacia Nodo 2.
-- Verificacion de replicacion Nodo 2 hacia Nodo 1.
-- Verificacion de replicacion hacia Nodo 3.
-- Prueba de failover mediante proxy.
-- Reintegracion del Nodo 1.
-- Medicion final de RTO.
-- Medicion final de RPO.
+- PostgreSQL 18.6 operativo.
+- app_databaugs configurado.
+- replicador configurado.
+- pub_nodo1 activa.
+- sub_nodo1_desde_nodo2 configurada.
+- Replicacion bidireccional con Nodo 2 validada.
+- Replicacion hacia Nodo 3 validada.
+- HAProxy integrado.
+- Failover y reintegracion probados.
+- Pruebas de carga en ejecucion dentro de la Fase 6.

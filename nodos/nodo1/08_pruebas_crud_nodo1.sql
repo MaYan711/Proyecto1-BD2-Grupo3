@@ -1,7 +1,7 @@
-SELECT * FROM operaciones
+SELECT * FROM public.operaciones
 ORDER BY fecha_registro;
 
-INSERT INTO operaciones (
+INSERT INTO public.operaciones (
     descripcion,
     origen,
     valor
@@ -12,18 +12,18 @@ VALUES (
     500.00
 );
 
-SELECT * FROM operaciones
+SELECT * FROM public.operaciones
 ORDER BY fecha_registro;
 
-UPDATE operaciones
+UPDATE public.operaciones
 SET valor = 550.00
 WHERE descripcion = 'Prueba replicacion desde Nodo 1';
 
-SELECT * FROM operaciones
+SELECT * FROM public.operaciones
 ORDER BY fecha_registro;
 
-DELETE FROM operaciones
+DELETE FROM public.operaciones
 WHERE descripcion = 'Prueba replicacion desde Nodo 1';
 
-SELECT * FROM operaciones
+SELECT * FROM public.operaciones
 ORDER BY fecha_registro;
